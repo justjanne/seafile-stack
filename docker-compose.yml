@@ -1,0 +1,92 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  seafile:
+    build:
+      context: .
+      dockerfile: Dockerfile.seafile
+    volumes:
+      - ./config:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+      - INNER_SERVICE_URL=http://seahub:8000
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seafevents:
+    build:
+      context: .
+      dockerfile: Dockerfile.seafevents
+    volumes:
+      - ./config:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seahub
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8889:8889"
+    depends_on:
+      db:
+        condition: service_healthy
+      seafile:
+        condition: service_started
+
+  seahub:
+    build:
+      context: .
+      dockerfile: Dockerfile.seahub
+    volumes:
+      - ./config:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seahub
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      seafile:
+        condition: service_started
+
+volumes:
+  pgdata:
+  seafile-data:
+  shared-run:

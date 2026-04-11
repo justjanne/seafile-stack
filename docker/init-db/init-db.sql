@@ -1,0 +1,6 @@
+CREATE USER seafile WITH ENCRYPTED PASSWORD 'password';
+CREATE USER seahub WITH ENCRYPTED PASSWORD 'password';
+
+CREATE DATABASE ccnet OWNER seafile;
+CREATE DATABASE seafile OWNER seafile;
+CREATE DATABASE seahub OWNER seahub;
