@@ -1,24 +1,19 @@
 [submodule "libevhtp"]
 	path = libevhtp
 	url = https://github.com/justjanne/libevhtp.git
-	pushurl = git@github.com:justjanne/libevhtp.git
 [submodule "libsearpc"]
 	path = libsearpc
 	url = https://github.com/justjanne/libsearpc.git
-	pushurl = git@github.com:justjanne/libsearpc.git
 [submodule "seafile-server"]
 	path = seafile-server
 	url = https://github.com/justjanne/seafile-server.git
-	pushurl = git@github.com:justjanne/seafile-server.git
 [submodule "seahub"]
 	path = seahub
 	url = https://github.com/justjanne/seahub.git
-	pushurl = git@github.com:justjanne/seahub.git
 [submodule "seafevents"]
 	path = seafevents
 	url = https://github.com/justjanne/seafevents.git
-	pushurl = git@github.com:justjanne/seafevents.git
 [submodule "seafobj"]
 	path = seafobj
 	url = https://github.com/justjanne/seafobj.git
-	pushurl = git@github.com:justjanne/seafobj.git
+
