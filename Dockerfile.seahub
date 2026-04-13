@@ -88,7 +88,6 @@ RUN make
 RUN make install
 RUN ldconfig
 
-ADD seafevents /source/seafevents
 ADD seafobj /source/seafobj
 ADD seahub /source/seahub
 

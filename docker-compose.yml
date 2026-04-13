@@ -42,27 +42,6 @@ services:
       db:
         condition: service_healthy
 
-  seafevents:
-    build:
-      context: .
-      dockerfile: Dockerfile.seafevents
-    volumes:
-      - ./config:/config
-      - seafile-data:/data
-      - shared-run:/run/seafile
-    environment:
-      - SEAFILE_DB_USER=seahub
-      - SEAFILE_DB_PASSWORD=password
-    env_file:
-      - docker-compose.env
-    ports:
-      - "8889:8889"
-    depends_on:
-      db:
-        condition: service_healthy
-      seafile:
-        condition: service_started
-
   seahub:
     build:
       context: .

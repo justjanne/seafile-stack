@@ -88,8 +88,6 @@ RUN make
 RUN make install
 RUN ldconfig
 
-ADD seahub /source/seahub
-
 VOLUME /config
 VOLUME /data
 VOLUME /tmp

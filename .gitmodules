@@ -10,9 +10,6 @@
 [submodule "seahub"]
 	path = seahub
 	url = https://github.com/justjanne/seahub.git
-[submodule "seafevents"]
-	path = seafevents
-	url = https://github.com/justjanne/seafevents.git
 [submodule "seafobj"]
 	path = seafobj
 	url = https://github.com/justjanne/seafobj.git
