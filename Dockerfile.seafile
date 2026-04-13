@@ -82,8 +82,7 @@ RUN ldconfig
 
 ADD seafile-server /source/seafile-server
 WORKDIR /source/seafile-server
-RUN ./autogen.sh
-RUN ./configure --disable-fuse --with-postgresql
+RUN cmake -DENABLE_FUSE=OFF -DWITH_POSTGRESQL=ON .
 RUN make
 RUN make install
 RUN ldconfig
