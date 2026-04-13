@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "Starting database and redis..."
-docker compose up -d db redis
+echo "Starting database and valkey..."
+docker compose up -d db valkey
 
 echo "Waiting for database to be ready..."
 until [ "$(docker compose ps --format json db | grep -o '"Health":"healthy"' || true)" ]; do

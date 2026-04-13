@@ -14,10 +14,11 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7
+  valkey:
+    image: valkey/valkey:9.0.3
+    command: --requirepass "password"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "-a", "password", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -60,7 +61,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
+      valkey:
         condition: service_healthy
       seafile:
         condition: service_started
