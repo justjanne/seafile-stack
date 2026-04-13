@@ -36,3 +36,12 @@ FILE_SERVER_ROOT = 'http://localhost:8082'
 INNER_FILE_SERVER_ROOT = 'http://seafile:8082'
 SEAFEVENTS_SERVER_URL = 'http://seafevents:8889'
 SERVICE_URL = 'http://localhost:8000'
+
+ENABLE_ONLYOFFICE = True
+VERIFY_ONLYOFFICE_CERTIFICATE = False
+ONLYOFFICE_APIJS_URL = 'http://localhost:8080/web-apps/apps/api/documents/api.js'
+ONLYOFFICE_FILE_EXTENSION = ('doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'fodt', 'odp', 'fodp', 'ods', 'fods')
+ONLYOFFICE_EDIT_FILE_EXTENSION = ('docx', 'pptx', 'xlsx')
+
+ONLYOFFICE_FORCE_SAVE = True
+ONLYOFFICE_JWT_SECRET = '52d3d4f142b34b5dbec60ab59264e5cc'

@@ -66,6 +66,15 @@ services:
       seafile:
         condition: service_started
 
+  office:
+    image: ghcr.io/euro-office/documentserver:latest
+    environment:
+      - JWT_SECRET=52d3d4f142b34b5dbec60ab59264e5cc
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8080:80"
+
 volumes:
   pgdata:
   seafile-data:
