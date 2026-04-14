@@ -7,6 +7,7 @@ RUN apt-get install -y \
     automake \
     cmake \
     build-essential \
+    ninja-build \
     curl  \
     flex  \
     git  \
@@ -66,25 +67,27 @@ RUN mkdir /source
 WORKDIR /source
 
 ADD libevhtp /source/libevhtp
-WORKDIR /source/libevhtp
-RUN cmake -DEVHTP_DISABLE_SSL=ON -DEVHTP_BUILD_SHARED=OFF .
-RUN make
-RUN make install
+RUN mkdir -p /source/libevhtp/build
+WORKDIR /source/libevhtp/build
+RUN cmake -DEVHTP_DISABLE_SSL=ON -DEVHTP_BUILD_SHARED=OFF -GNinja ..
+RUN ninja
+RUN ninja install
 RUN ldconfig
 
 ADD libsearpc /source/libsearpc
-WORKDIR /source/libsearpc
-RUN ./autogen.sh
-RUN ./configure
-RUN make
-RUN make install
+RUN mkdir -p /source/libsearpc/build
+WORKDIR /source/libsearpc/build
+RUN cmake -GNinja ..
+RUN ninja
+RUN ninja install
 RUN ldconfig
 
 ADD seafile-server /source/seafile-server
-WORKDIR /source/seafile-server
-RUN cmake -DENABLE_FUSE=OFF -DWITH_POSTGRESQL=ON .
-RUN make
-RUN make install
+RUN mkdir -p /source/seafile-server/build
+WORKDIR /source/seafile-server/build
+RUN cmake -DENABLE_FUSE=OFF -DWITH_POSTGRESQL=ON -GNinja ..
+RUN ninja
+RUN ninja install
 RUN ldconfig
 
 VOLUME /config

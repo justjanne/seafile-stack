@@ -26,7 +26,7 @@ services:
   seafile:
     build:
       context: .
-      dockerfile: Dockerfile.seafile
+      dockerfile: seafile.dockerfile
     volumes:
       - ./config:/config
       - seafile-data:/data
@@ -46,7 +46,7 @@ services:
   seahub:
     build:
       context: .
-      dockerfile: Dockerfile.seahub
+      dockerfile: seahub.dockerfile
     volumes:
       - ./config:/config
       - seafile-data:/data
