@@ -14,3 +14,6 @@
 	path = seafobj
 	url = https://github.com/justjanne/seafobj.git
 
+[submodule "seafile-notifications"]
+	path = seafile-notifications
+	url = https://github.com/justjanne/seafile-notifications.git
