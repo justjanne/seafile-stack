@@ -34,11 +34,29 @@ services:
     environment:
       - SEAFILE_DB_USER=seafile
       - SEAFILE_DB_PASSWORD=password
-      - INNER_SERVICE_URL=http://seahub:8000
     env_file:
       - docker-compose.env
     ports:
       - "8082:8082"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seafile-notifications:
+    build:
+      context: seafile-notifications
+      dockerfile: Dockerfile
+    volumes:
+      - ../config:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8083:8083"
     depends_on:
       db:
         condition: service_healthy
