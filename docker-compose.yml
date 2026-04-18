@@ -63,8 +63,8 @@ services:
 
   seahub:
     build:
-      context: .
-      dockerfile: seahub.dockerfile
+      context: seahub
+      dockerfile: Dockerfile
     volumes:
       - ./config:/config
       - seafile-data:/data
