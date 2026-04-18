@@ -33,7 +33,7 @@ CACHES = {
 }
 
 FILE_SERVER_ROOT = 'http://localhost:8082'
-INNER_FILE_SERVER_ROOT = 'http://seafile:8082'
+INNER_FILE_SERVER_ROOT = 'http://fileserver:8082'
 
 SERVICE_URL = 'http://localhost:8000'
 INNER_SERVICE_URL = 'http://seahub:8000'
