@@ -19,3 +19,6 @@
 [submodule "libseaserv"]
 	path = libseaserv
 	url = https://github.com/justjanne/libseaserv.git
+[submodule "seafile-fileserver"]
+	path = seafile-fileserver
+	url = https://github.com/justjanne/seafile-fileserver.git

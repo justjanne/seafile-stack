@@ -36,18 +36,16 @@ services:
       - SEAFILE_DB_PASSWORD=password
     env_file:
       - docker-compose.env
-    ports:
-      - "8082:8082"
     depends_on:
       db:
         condition: service_healthy
 
-  seafile-notifications:
+  notifications:
     build:
       context: seafile-notifications
       dockerfile: Dockerfile
     volumes:
-      - ../config:/config
+      - ./config:/config
       - seafile-data:/data
       - shared-run:/run/seafile
     environment:
@@ -58,6 +56,27 @@ services:
     ports:
       - "8083:8083"
     depends_on:
+      db:
+        condition: service_healthy
+
+  fileserver:
+    build:
+      context: seafile-fileserver
+      dockerfile: Dockerfile
+    volumes:
+      - ./config:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - docker-compose.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      seafile:
+        condition: service_started
       db:
         condition: service_healthy
 
@@ -82,6 +101,8 @@ services:
       valkey:
         condition: service_healthy
       seafile:
+        condition: service_started
+      fileserver:
         condition: service_started
 
   office:

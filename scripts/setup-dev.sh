@@ -15,7 +15,7 @@ docker compose exec db psql --user=postgres --db=seafile -c "GRANT ALL ON SCHEMA
 docker compose exec db psql --user=postgres --db=seahub -c "GRANT ALL ON SCHEMA public TO seahub"
 
 echo "Starting Seafile components..."
-docker compose up -d seafile seahub office
+docker compose up -d seafile seahub office fileserver notifications
 
 echo "Running migrations..."
 docker compose exec seahub python3 manage.py migrate
