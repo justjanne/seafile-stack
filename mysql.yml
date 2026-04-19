@@ -1,0 +1,86 @@
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./config/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    extends:
+      file: base.yml
+      service: valkey
+
+  seafile:
+    extends:
+      file: base.yml
+      service: seafile
+    volumes:
+      - ./config/mysql:/config
+    env_file:
+      - mysql.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notifications:
+    extends:
+      file: base.yml
+      service: notifications
+    volumes:
+      - ./config/mysql:/config
+    env_file:
+      - mysql.env
+    depends_on:
+      seafile:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  fileserver:
+    extends:
+      file: base.yml
+      service: fileserver
+    volumes:
+      - ./config/mysql:/config
+    env_file:
+      - mysql.env
+    depends_on:
+      seafile:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  seahub:
+    extends:
+      file: base.yml
+      service: seahub
+    volumes:
+      - ./config/mysql:/config
+    env_file:
+      - mysql.env
+    depends_on:
+      seafile:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  office:
+    extends:
+      file: base.yml
+      service: office
+    env_file:
+      - mysql.env
+
+volumes:
+  db-data:
+  seafile-data:
+  shared-run:

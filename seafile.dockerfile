@@ -68,7 +68,7 @@ RUN ldconfig
 ADD seafile-server /source/seafile-server
 RUN mkdir -p /source/seafile-server/build
 WORKDIR /source/seafile-server/build
-RUN cmake -DENABLE_FUSE=OFF -DWITH_POSTGRESQL=ON -GNinja ..
+RUN cmake -DENABLE_FUSE=OFF -DWITH_MYSQL=ON -DWITH_POSTGRESQL=ON -GNinja ..
 RUN ninja
 RUN ninja install
 RUN ldconfig
