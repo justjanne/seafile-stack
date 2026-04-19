@@ -1,0 +1,93 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./config/pgsql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:9.0.3
+    command: --requirepass "password"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "-a", "password", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  seafile:
+    image: ghcr.io/justjanne/seafile-server:sha-995b053
+    volumes:
+      - ./config/pgsql:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - pgsql.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notifications:
+    image: ghcr.io/justjanne/seafile-notifications:sha-e9104a8
+    volumes:
+      - ./config/pgsql:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - pgsql.env
+    ports:
+      - "8083:8083"
+
+  fileserver:
+    image: ghcr.io/justjanne/seafile-fileserver:sha-cfffbb5
+    volumes:
+      - ./config/pgsql:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - pgsql.env
+    ports:
+      - "8082:8082"
+
+  seahub:
+    image: ghcr.io/justjanne/seahub:sha-cc056db
+    volumes:
+      - ./config/pgsql:/config
+      - seafile-data:/data
+      - shared-run:/run/seafile
+    environment:
+      - SEAFILE_DB_USER=seahub
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - pgsql.env
+    ports:
+      - "8000:8000"
+
+  office:
+    image: ghcr.io/euro-office/documentserver:latest
+    environment:
+      - JWT_SECRET=52d3d4f142b34b5dbec60ab59264e5cc
+    ports:
+      - "8080:80"
+
+volumes:
+  db-data:
+  seafile-data:
+  shared-run:

@@ -13,7 +13,7 @@ Forked from Seafile 13.0
 
 **Setup**
 
-Run `./scripts/setup-dev.sh`. This will setup the docker stack and ask you to create a superuser.
+Run `./scripts/setup-test.sh`. This will setup the docker stack and ask you to create a superuser.
 You can access seafile on http://localhost:8000
 
 **Stop**
