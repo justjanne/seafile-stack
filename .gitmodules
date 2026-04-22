@@ -22,3 +22,6 @@
 [submodule "seafile-fileserver"]
 	path = seafile-fileserver
 	url = https://github.com/justjanne/seafile-fileserver.git
+[submodule "seafile-migrations"]
+	path = seafile-migrations
+	url = https://github.com/justjanne/seafile-migrations.git
