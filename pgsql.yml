@@ -15,30 +15,63 @@ services:
       retries: 5
 
   valkey:
-    extends:
-      file: base.yml
-      service: valkey
+    image: valkey/valkey:9.0.3
+    command: --requirepass "password"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "-a", "password", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  seafile:
-    extends:
-      file: base.yml
-      service: seafile
+  migrations:
+    build:
+      context: seafile-migrations
+      dockerfile: Dockerfile
     volumes:
       - ./config/pgsql:/config
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
     env_file:
       - pgsql.env
     depends_on:
       db:
         condition: service_healthy
 
-  notifications:
-    extends:
-      file: base.yml
-      service: notifications
+  seafile:
+    build:
+      context: seafile-server
+      dockerfile: Dockerfile
     volumes:
+      - seafile-data:/data
+      - shared-run:/run/seafile
       - ./config/pgsql:/config
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
     env_file:
       - pgsql.env
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notifications:
+    build:
+      context: seafile-notifications
+      dockerfile: Dockerfile
+    volumes:
+      - seafile-data:/data
+      - shared-run:/run/seafile
+      - ./config/pgsql:/config
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+    env_file:
+      - pgsql.env
+    ports:
+      - "8083:8083"
     depends_on:
       seafile:
         condition: service_started
@@ -46,13 +79,20 @@ services:
         condition: service_healthy
 
   fileserver:
-    extends:
-      file: base.yml
-      service: fileserver
+    build:
+      context: seafile-fileserver
+      dockerfile: Dockerfile
     volumes:
+      - seafile-data:/data
+      - shared-run:/run/seafile
       - ./config/pgsql:/config
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
     env_file:
       - pgsql.env
+    ports:
+      - "8082:8082"
     depends_on:
       seafile:
         condition: service_started
@@ -60,13 +100,20 @@ services:
         condition: service_healthy
 
   seahub:
-    extends:
-      file: base.yml
-      service: seahub
+    build:
+      context: seahub
+      dockerfile: Dockerfile
     volumes:
+      - seafile-data:/data
+      - shared-run:/run/seafile
       - ./config/pgsql:/config
+    environment:
+      - SEAFILE_DB_USER=seahub
+      - SEAFILE_DB_PASSWORD=password
     env_file:
       - pgsql.env
+    ports:
+      - "8000:8000"
     depends_on:
       seafile:
         condition: service_started
@@ -74,11 +121,13 @@ services:
         condition: service_healthy
 
   office:
-    extends:
-      file: base.yml
-      service: office
+    image: ghcr.io/euro-office/documentserver:latest
+    environment:
+      - JWT_SECRET=52d3d4f142b34b5dbec60ab59264e5cc
     env_file:
       - pgsql.env
+    ports:
+      - "8080:80"
 
 volumes:
   db-data:
