@@ -5,7 +5,8 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-jwtSecret: "f06052e8d82e57baa5a3befcc0006e219b7c56c9"
+# You MUST change this
+jwtSecret: "0000000000000000000000000000000000000000"
 
 controller:
   image:
