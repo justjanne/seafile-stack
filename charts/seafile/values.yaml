@@ -1,0 +1,115 @@
+replicaCount: 1
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+jwtSecret: "f06052e8d82e57baa5a3befcc0006e219b7c56c9"
+
+controller:
+  image:
+    repository: ghcr.io/justjanne/seafile-server
+    pullPolicy: IfNotPresent
+    tag: sha-666904f
+  database:
+    type: pgsql
+    host: postgres.seafile-demo.svc.cluster.local
+    port: 5432
+    name: ccnet
+    username: seafile
+    password: password
+  resources: {}
+
+fileserver:
+  internalUrl: ""
+  image:
+    repository: ghcr.io/justjanne/seafile-fileserver
+    pullPolicy: IfNotPresent
+    tag: sha-cfffbb5
+  database:
+    type: pgsql
+    host: postgres.seafile-demo.svc.cluster.local
+    port: 5432
+    name: seafile
+    username: seafile
+    password: password
+  resources: {}
+
+frontend:
+  internalUrl: ""
+  image:
+    repository: ghcr.io/justjanne/seahub
+    pullPolicy: IfNotPresent
+    tag: sha-cc056db
+  database:
+    type: pgsql
+    host: postgres.seafile-demo.svc.cluster.local
+    port: 5432
+    name: seahub
+    username: seahub
+    password: password
+  resources: {}
+
+notifications:
+  internalUrl: ""
+  image:
+    repository: ghcr.io/justjanne/seafile-notifications
+    pullPolicy: IfNotPresent
+    tag: sha-e9104a8
+  resources: {}
+
+migrations:
+  image:
+    repository: ghcr.io/justjanne/seafile-migrations
+    pullPolicy: IfNotPresent
+    tag: sha-2d3ece7
+
+cache:
+  host: valkey.seafile-demo.svc.cluster.local
+  port: 6379
+  password: password
+
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  existingClaim: ""
+  # annotations: {}
+  # selector: {}
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+  host: seafile.local
+  tls: []
+
+service:
+  type: ClusterIP
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+# runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

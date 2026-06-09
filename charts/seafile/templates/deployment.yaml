@@ -1,0 +1,259 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "seafile.fullname" . }}
+  labels:
+    {{- include "seafile.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "seafile.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "seafile.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: migrations-controller
+          image: {{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.migrations.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - liquibase
+            - "--url=jdbc:$(SEAFILE_DB_PROTOCOL)://$(SEAFILE_DB_HOST):$(SEAFILE_DB_PORT)/$(SEAFILE_CCNET_DB_NAME)"
+            - "--username=$(SEAFILE_DB_USER)"
+            - "--password=$(SEAFILE_DB_PASSWORD)"
+            - update
+            - "--changelog-file=ccnet.yaml"
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-controller
+          volumeMounts:
+            - mountPath: /config
+              name: config
+        - name: migrations-fileserver
+          image: {{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.migrations.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - liquibase
+            - "--url=jdbc:$(SEAFILE_DB_PROTOCOL)://$(SEAFILE_DB_HOST):$(SEAFILE_DB_PORT)/$(SEAFILE_SEAFILE_DB_NAME)"
+            - "--username=$(SEAFILE_DB_USER)"
+            - "--password=$(SEAFILE_DB_PASSWORD)"
+            - update
+            - "--changelog-file=seafile.yaml"
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-fileserver
+          volumeMounts:
+            - mountPath: /config
+              name: config
+        - name: migrations-frontend
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - "python3"
+            - "manage.py"
+            - "migrate"
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-frontend
+          volumeMounts:
+            - mountPath: /config
+              name: config
+      containers:
+        - name: controller
+          image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-controller
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /run/seafile
+              name: tmp
+            - mountPath: /config
+              name: config
+          {{- with .Values.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: fileserver
+          image: {{ .Values.fileserver.image.repository }}:{{ .Values.fileserver.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.fileserver.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-fileserver
+          ports:
+            - containerPort: 8082
+              name: fileserver
+          livenessProbe:
+            httpGet:
+              path: /protocol-version
+              port: fileserver
+          readinessProbe:
+            httpGet:
+              path: /protocol-version
+              port: fileserver
+          startupProbe:
+            httpGet:
+              path: /protocol-version
+              port: fileserver
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /run/seafile
+              name: tmp
+            - mountPath: /config
+              name: config
+          {{- with .Values.fileserver.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: frontend
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-frontend
+          ports:
+            - containerPort: 8000
+              name: frontend
+          livenessProbe:
+            httpGet:
+              path: /api2/ping
+              port: frontend
+          readinessProbe:
+            httpGet:
+              path: /api2/ping
+              port: frontend
+          startupProbe:
+            httpGet:
+              path: /api2/ping
+              port: frontend
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /run/seafile
+              name: tmp
+            - mountPath: /config
+              name: config
+          {{- with .Values.frontend.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: notifications
+          image: {{ .Values.notifications.image.repository }}:{{ .Values.notifications.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.notifications.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "seafile.fullname" . }}-environment
+            - secretRef:
+                name: {{ include "seafile.fullname" . }}-controller
+          ports:
+            - containerPort: 8083
+              name: notifications
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: notifications
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: notifications
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: notifications
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /run/seafile
+              name: tmp
+            - mountPath: /config
+              name: config
+          {{- with .Values.notifications.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          secret:
+            secretName: {{ include "seafile.fullname" . }}-config
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-data" (include "seafile.fullname" .)) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

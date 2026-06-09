@@ -1,0 +1,145 @@
+# ## Demo Kubernetes Environment
+#
+# `minikube start`
+# `kubectl create -f k8s.yml`
+# (wait a while)
+# `kubectl exec -n seafile-demo deploy/seafile --container=seahub --stdin --tty -- python3 manage.py createsuperuser`
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+data:
+  hsts: "false"
+  allow-snippet-annotations: "true"
+  annotations-risk-level: "Critical"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: seafile-demo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: seafile-demo
+  labels:
+    app: database
+data:
+  init-db.sql: |-
+    CREATE USER seafile WITH ENCRYPTED PASSWORD 'password';
+    CREATE USER seahub WITH ENCRYPTED PASSWORD 'password';
+
+    CREATE DATABASE ccnet OWNER seafile;
+    CREATE DATABASE seafile OWNER seafile;
+    CREATE DATABASE seahub OWNER seahub;
+
+    \c ccnet
+    GRANT ALL ON SCHEMA public TO seafile;
+
+    \c seafile
+    GRANT ALL ON SCHEMA public TO seafile;
+
+    \c seahub
+    GRANT ALL ON SCHEMA public TO seahub;
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: seafile-demo
+  labels:
+    app: database
+spec:
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18
+          env:
+            - name: POSTGRES_PASSWORD
+              value: password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d/
+          ports:
+            - name: postgres
+              containerPort: 5432
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: init
+          configMap:
+            name: postgres-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: seafile-demo
+  labels:
+    app: database
+spec:
+  selector:
+    app: database
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey
+  namespace: seafile-demo
+  labels:
+    app: cache
+spec:
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+        - name: valkey
+          image: valkey/valkey:9.0.3
+          args:
+            - "--requirepass"
+            - "password"
+          ports:
+            - name: valkey
+              containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey
+  namespace: seafile-demo
+  labels:
+    app: cache
+spec:
+  selector:
+    app: cache
+  ports:
+    - name: valkey
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP

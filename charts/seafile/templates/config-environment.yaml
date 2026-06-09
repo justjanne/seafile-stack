@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "seafile.fullname" . }}-environment
+  labels:
+    {{- include "seafile.labels" . | nindent 4 }}
+data:
+  CCNET_CONF_DIR: "/config"
+  SEAFILE_CENTRAL_CONF_DIR: "/config"
+  SEAFILE_DATA_DIR: "/data"
+  SEAFILE_CCNET_DB_NAME: "{{ .Values.controller.database.name }}"
+  SEAFILE_SEAFILE_DB_NAME: "{{ .Values.fileserver.database.name }}"
+  SEAFILE_SEAHUB_DB_NAME: "{{ .Values.frontend.database.name }}"
+  SEAFILE_RPC_PIPE_PATH: "/run/seafile"
+  CACHE_PROVIDER: "redis"
+  REDIS_HOST: {{ .Values.cache.host | quote }}
+  REDIS_PORT: {{ .Values.cache.port | quote }}
+  SEAFILE_LOG_TO_STDOUT: "true"
+  ENABLE_GO_FILESERVER: "true"
+  SERVICE_URL: {{ include "seafile.frontend.externalUrl" . | quote }}
+  INNER_SERVICE_URL: {{ include "seafile.frontend.internalUrl" . | quote }}
+  ENABLE_NOTIFICATION_SERVER: "true"
+  NOTIFICATION_SERVER_URL: {{ include "seafile.notifications.externalUrl" . | quote }}
+  INNER_NOTIFICATION_SERVER_URL: {{ include "seafile.notifications.internalUrl" . | quote }}
+  ENABLE_SEADOC: "false"
