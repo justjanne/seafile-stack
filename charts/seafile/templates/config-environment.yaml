@@ -13,13 +13,13 @@ data:
   SEAFILE_SEAHUB_DB_NAME: "{{ .Values.frontend.database.name }}"
   SEAFILE_RPC_PIPE_PATH: "/run/seafile"
   CACHE_PROVIDER: "redis"
-  REDIS_HOST: {{ .Values.cache.host | quote }}
-  REDIS_PORT: {{ .Values.cache.port | quote }}
+  REDIS_HOST: "{{ .Values.cache.host }}"
+  REDIS_PORT: "{{ .Values.cache.port }}"
   SEAFILE_LOG_TO_STDOUT: "true"
   ENABLE_GO_FILESERVER: "true"
-  SERVICE_URL: {{ include "seafile.frontend.externalUrl" . | quote }}
-  INNER_SERVICE_URL: {{ include "seafile.frontend.internalUrl" . | quote }}
+  SERVICE_URL: "{{ include "seafile.frontend.externalUrl" . }}/"
+  INNER_SERVICE_URL: "{{ include "seafile.frontend.internalUrl" . }}"
   ENABLE_NOTIFICATION_SERVER: "true"
-  NOTIFICATION_SERVER_URL: {{ include "seafile.notifications.externalUrl" . | quote }}
-  INNER_NOTIFICATION_SERVER_URL: {{ include "seafile.notifications.internalUrl" . | quote }}
+  NOTIFICATION_SERVER_URL: "{{ include "seafile.notifications.externalUrl" . }}/"
+  INNER_NOTIFICATION_SERVER_URL: "{{ include "seafile.notifications.internalUrl" . }}"
   ENABLE_SEADOC: "false"

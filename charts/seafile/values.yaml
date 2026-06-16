@@ -24,6 +24,7 @@ controller:
 
 fileserver:
   internalUrl: ""
+  externalUrl: ""
   image:
     repository: ghcr.io/justjanne/seafile-fileserver
     pullPolicy: IfNotPresent
@@ -39,6 +40,7 @@ fileserver:
 
 frontend:
   internalUrl: ""
+  externalUrl: ""
   image:
     repository: ghcr.io/justjanne/seahub
     pullPolicy: IfNotPresent
@@ -50,10 +52,12 @@ frontend:
     name: seahub
     username: seahub
     password: password
+  avatarStorage: filesystem
   resources: {}
 
 notifications:
   internalUrl: ""
+  externalUrl: ""
   image:
     repository: ghcr.io/justjanne/seafile-notifications
     pullPolicy: IfNotPresent

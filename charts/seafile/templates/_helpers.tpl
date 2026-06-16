@@ -59,7 +59,11 @@ redis://:{{ .Values.cache.password }}@{{ .Values.cache.host}}:{{ .Values.cache.p
 {{- end }}
 
 {{- define "seafile.fileserver.externalUrl" -}}
-http://{{ .Values.ingress.host }}/seafhttp/
+{{- if .Values.frontend.externalUrl -}}
+{{ .Values.frontend.externalUrl }}
+{{- else -}}
+https://{{ .Values.ingress.host }}/seafhttp
+{{- end }}
 {{- end }}
 
 {{- define "seafile.fileserver.internalUrl" -}}
@@ -71,7 +75,11 @@ http://{{ include "seafile.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.l
 {{- end }}
 
 {{- define "seafile.frontend.externalUrl" -}}
-http://{{ .Values.ingress.host }}/
+{{- if .Values.frontend.externalUrl -}}
+{{ .Values.frontend.externalUrl }}
+{{- else -}}
+https://{{ .Values.ingress.host }}
+{{- end }}
 {{- end }}
 
 {{- define "seafile.frontend.internalUrl" -}}
@@ -83,7 +91,11 @@ http://{{ include "seafile.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.l
 {{- end }}
 
 {{- define "seafile.notifications.externalUrl" -}}
-http://{{ .Values.ingress.host }}/notification/
+{{- if .Values.notifications.externalUrl -}}
+{{ .Values.notifications.externalUrl }}
+{{- else -}}
+https://{{ .Values.ingress.host }}/notification
+{{- end }}
 {{- end }}
 
 {{- define "seafile.notifications.internalUrl" -}}
