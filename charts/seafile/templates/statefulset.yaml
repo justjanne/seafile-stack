@@ -1,20 +1,22 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "seafile.fullname" . }}
   labels:
     {{- include "seafile.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: "{{ include "seafile.fullname" . }}"
   selector:
     matchLabels:
       {{- include "seafile.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ $.Values | toJson | sha256sum }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "seafile.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}

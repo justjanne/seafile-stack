@@ -28,7 +28,7 @@ fileserver:
   image:
     repository: ghcr.io/justjanne/seafile-fileserver
     pullPolicy: IfNotPresent
-    tag: sha-cfffbb5
+    tag: sha-24970407
   database:
     type: pgsql
     host: postgres.seafile-demo.svc.cluster.local
@@ -44,7 +44,7 @@ frontend:
   image:
     repository: ghcr.io/justjanne/seahub
     pullPolicy: IfNotPresent
-    tag: sha-cc056db
+    tag: sha-c2d21bc0
   database:
     type: pgsql
     host: postgres.seafile-demo.svc.cluster.local
@@ -98,6 +98,7 @@ ingress:
 
 service:
   type: ClusterIP
+  ipFamilyPolicy: PreferDualStack
 
 podAnnotations: {}
 podLabels: {}
